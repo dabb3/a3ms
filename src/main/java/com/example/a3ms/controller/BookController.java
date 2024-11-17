@@ -1,6 +1,5 @@
 package com.example.a3ms.controller;
 
-
 import com.example.a3ms.model.BookModel;
 import com.example.a3ms.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +23,19 @@ public class BookController {
 
     @GetMapping("/{id}")
     public ResponseEntity<BookModel> getBookById(@PathVariable Long id) {
-        Optional<BookModel> book = bookService.findById(id);
+        Optional<BookModel> book = Optional.ofNullable(bookService.findById(id));
         return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public BookModel createBook(@RequestBody BookModel book) {
-        return bookService.save(book);
+    public ResponseEntity<BookModel> createBook(@RequestBody BookModel book) {
+        BookModel savedBook = bookService.save(book);
+        return ResponseEntity.ok(savedBook);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookModel> updateBook(@PathVariable Long id, @RequestBody BookModel bookDetails) {
-        Optional<BookModel> book = bookService.findById(id);
+        Optional<BookModel> book = Optional.ofNullable(bookService.findById(id));
         if (book.isPresent()) {
             BookModel updatedBook = book.get();
             updatedBook.setTitle(bookDetails.getTitle());
@@ -43,7 +43,8 @@ public class BookController {
             updatedBook.setGender(bookDetails.getGender());
             updatedBook.setPublicationYear(bookDetails.getPublicationYear());
             updatedBook.setAvailableQuantity(bookDetails.getAvailableQuantity());
-            return ResponseEntity.ok(bookService.save(updatedBook));
+            BookModel savedBook = bookService.save(updatedBook);
+            return ResponseEntity.ok(savedBook);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -55,3 +56,4 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 }
+
